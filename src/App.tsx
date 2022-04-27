@@ -14,11 +14,6 @@ interface Data {
   name: string;
 }
 
-// interface EventProps {(
-//   event: string
-//   ): void;
-// }
-
 function App() {
   const [repos, setRepos] = useState({
     data: [],
@@ -28,14 +23,9 @@ function App() {
   const [repoType, setRepoType] = useState('all');
   const [repoSort, setRepoSort] = useState('created');
   const [repoDirection, setRepoDirection] = useState('desc');
-  // const [repoFilter, setRepoFilter] = useState({
-  //   type: 'all',
-  //   sort: 'created',
-  //   direction: 'desc'
-  // });
 
   const handleFetchData: FetchProps = async(type, sort, direction) => {
-    console.log({type, sort})
+    console.log({type, sort, direction})
     let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}`;
 
     try {
@@ -51,19 +41,19 @@ function App() {
     }
   }
 
-  const handleUpdateRepoType = (event) => {
-    setRepoType(event.target.value);
+  const handleUpdateRepoType = (type: string) => {
+    setRepoType(type);
     handleFetchData(repoType, repoSort, repoDirection);
   }
 
-  const handleUpdateRepoSort = (event) => {
-    setRepoSort(event.target.value);
+  const handleUpdateRepoSort = (sort: string) => {
+    setRepoSort(sort);
     handleFetchData(repoType, repoSort, repoDirection);
   }
 
 
-  const handleUpdateRepoDirection = (event) => {
-    setRepoDirection(event.target.value);
+  const handleUpdateRepoDirection = (direction: string) => {
+    setRepoDirection(direction);
     handleFetchData(repoType, repoSort, repoDirection);
   }
 
@@ -71,35 +61,32 @@ function App() {
     handleFetchData(repoType, repoSort, repoDirection);
   }, [setRepos]);
 
-
-  // onClick={() => { setRepoSort('created'); handleFetchData(repoType, repoSort) }}
-
   return (
     <div className="App">
       <header className="filter">
         <fieldset>
           <legend>Repos Type</legend>
-          <input id="type_all" type="radio" name="type" value="all" checked={repoType === 'all'} onChange={({target}) => handleUpdateRepoType(target.value)} />
+          <input id="type_all" type="radio" name="type" value="all" checked={repoType === 'all'} onChange={({ target }) => handleUpdateRepoType(target.value)} />
           <label className="filterName" htmlFor="type_all">All</label>
-          <input id="type_forks" type="radio" name="type" value="forks" checked={repoType === 'forks'} onChange={({target}) => handleUpdateRepoType(target.value)} />
+          <input id="type_forks" type="radio" name="type" value="forks" checked={repoType === 'forks'} onChange={({ target }) => handleUpdateRepoType(target.value)} />
           <label className="filterName" htmlFor="type_forks">Forks</label>
         </fieldset>
         <fieldset>
           <legend>Sort</legend>
-          <input id="sort_created" type="radio" name="sort" value="created" checked={repoSort === 'created'} onChange={handleUpdateRepoSort}  />
+          <input id="sort_created" type="radio" name="sort" value="created" checked={repoSort === 'created'} onChange={({ target }) => handleUpdateRepoSort(target.value)}  />
           <label className="filterName" htmlFor="sort_created">Created Time</label>
-          <input id="sort_updated" type="radio" name="sort" value="updated" checked={repoSort === 'updated'} onChange={handleUpdateRepoSort} />
+          <input id="sort_updated" type="radio" name="sort" value="updated" checked={repoSort === 'updated'} onChange={({ target }) => handleUpdateRepoSort(target.value)} />
           <label className="filterName" htmlFor="sort_updated">Updated Time</label>
-          <input id="sort_pushed" type="radio" name="sort" value="pushed" checked={repoSort === 'pushed'} onChange={handleUpdateRepoSort} />
+          <input id="sort_pushed" type="radio" name="sort" value="pushed" checked={repoSort === 'pushed'} onChange={({ target }) => handleUpdateRepoSort(target.value)} />
           <label className="filterName" htmlFor="sort_pushed">Pushed Time</label>
-          <input id="sort_full_name" type="radio" name="sort" value="full_name" checked={repoSort === 'full_name'} onChange={handleUpdateRepoSort} />
+          <input id="sort_full_name" type="radio" name="sort" value="full_name" checked={repoSort === 'full_name'} onChange={({ target }) => handleUpdateRepoSort(target.value)} />
           <label className="filterName" htmlFor="sort_full_name">Full Name</label>
         </fieldset>
         <fieldset>
           <legend>Direction</legend>
-          <input id="direction_desc" type="radio" name="direction" value="desc" checked={repoDirection === 'desc'} onChange={({target}) => handleUpdateRepoDirection(target.value)} />
+          <input id="direction_desc" type="radio" name="direction" value="desc" checked={repoDirection === 'desc'} onChange={({ target }) => handleUpdateRepoDirection(target.value)} />
           <label className="filterName" htmlFor="direction_desc">Desc</label>
-          <input id="direction_asc" type="radio" name="direction" value="asc" checked={repoDirection === 'asc'} onChange={({target}) => handleUpdateRepoDirection(target.value)} />
+          <input id="direction_asc" type="radio" name="direction" value="asc" checked={repoDirection === 'asc'} onChange={({ target}) => handleUpdateRepoDirection(target.value)} />
           <label className="filterName" htmlFor="direction_asc">Asc</label>
         </fieldset>
       </header>
