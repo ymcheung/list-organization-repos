@@ -24,6 +24,47 @@ function App() {
   const [repoSort, setRepoSort] = useState('created');
   const [repoDirection, setRepoDirection] = useState('desc');
 
+  // const filters = [{
+  //   name: 'type',
+  //   legend: 'Repos Type',
+  //   hook: repoType,
+  //   items: [{
+  //     value: 'all',
+  //     label: 'All'
+  //   }, {
+  //     value: 'forks',
+  //     label: 'Forks'
+  //   }]
+  // }, {
+  //   name: 'sort',
+  //   legend: 'Sort',
+  //   hook: repoSort,
+  //   items: [{
+  //     value: 'created',
+  //     label: 'Created Time'
+  //   }, {
+  //     value: 'updated',
+  //     label: 'Updated Time'
+  //   }, {
+  //     value: 'pushed',
+  //     label: 'Pushed Time'
+  //   }, {
+  //     value: 'full_name',
+  //     label: 'Full Name'
+  //   }]
+  // }, {
+  //   name: 'direction',
+  //   legend: 'Direction',
+  //   hook: repoDirection,
+  //   items: [{
+  //     value: 'desc',
+  //     label: 'Descending'
+  //   }, {
+  //     value: 'asc',
+  //     label: 'Ascending'
+  //   }]
+  // }]
+
   const handleFetchData: FetchProps = async(type, sort, direction) => {
     console.log({type, sort, direction})
     let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}`;
@@ -51,19 +92,36 @@ function App() {
     handleFetchData(repoType, repoSort, repoDirection);
   }
 
-
   const handleUpdateRepoDirection = (direction: string) => {
     setRepoDirection(direction);
     handleFetchData(repoType, repoSort, repoDirection);
   }
 
+  // const filterControl = (name, value, label, hook) => {
+  //   return(
+  //     <>
+  //       <input id={`${name}_${value}`} type="radio" name={name} value={value} checked={hook === value} onChange={({ target }) => handleUpdateRepoType(target.value)} />
+  //       <label className="filterName" htmlFor={`${name}_${value}`}>{label}</label>
+  //     </>
+  //   )
+  // }
+
   useEffect(() => {
     handleFetchData(repoType, repoSort, repoDirection);
-  }, [setRepos]);
+  }, [setRepos, repoDirection, repoSort, repoType]);
 
   return (
     <div className="App">
       <header className="filter">
+        {/* {filters.map(({name, legend, hook, items}) =>
+          <fieldset>
+            <legend>{legend}</legend>
+            {items.map(({value, label}) =>
+              filterControl(name, value, label, hook)
+              )
+            }
+          </fieldset>
+        )} */}
         <fieldset>
           <legend>Repos Type</legend>
           <input id="type_all" type="radio" name="type" value="all" checked={repoType === 'all'} onChange={({ target }) => handleUpdateRepoType(target.value)} />
@@ -92,7 +150,7 @@ function App() {
       </header>
       <ul>
         {
-          repos.loading? '' : repos.data.map(({id, html_url, name}: Data) => (
+          repos.loading? 'Loading Data...' : repos.data.map(({id, html_url, name}: Data) => (
           <li key={id}>
             <a href={html_url}>{name}</a>
           </li>
