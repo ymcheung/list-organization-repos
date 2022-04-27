@@ -1,5 +1,9 @@
 
 .filter {
   display: grid;
-  grid: auto / auto auto;
+  grid: auto / auto auto auto;
+}
+
+.filterName {
+  margin-right: 8px;
 }
