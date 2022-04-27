@@ -12,6 +12,9 @@ interface Data {
   id: string;
   html_url: string;
   name: string;
+  updated_at: string;
+  pushed_at: string;
+  created_at: string;
 }
 
 function App() {
@@ -19,10 +22,24 @@ function App() {
     data: [],
     loading: true
   });
-
   const [repoType, setRepoType] = useState('all');
   const [repoSort, setRepoSort] = useState('created');
   const [repoDirection, setRepoDirection] = useState('desc');
+
+  const handleUpdateRepoType = (type: string) => {
+    setRepoType(type);
+    handleFetchData(repoType, repoSort, repoDirection);
+  }
+
+  const handleUpdateRepoSort = (sort: string) => {
+    setRepoSort(sort);
+    handleFetchData(repoType, repoSort, repoDirection);
+  }
+
+  const handleUpdateRepoDirection = (direction: string) => {
+    setRepoDirection(direction);
+    handleFetchData(repoType, repoSort, repoDirection);
+  }
 
   // const filters = [{
   //   name: 'type',
@@ -63,11 +80,10 @@ function App() {
   //     value: 'asc',
   //     label: 'Ascending'
   //   }]
-  // }]
+  // }];
 
   const handleFetchData: FetchProps = async(type, sort, direction) => {
-    console.log({type, sort, direction})
-    let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}`;
+    let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}&per_page=12`;
 
     try {
       const res = await fetch(url);
@@ -82,19 +98,10 @@ function App() {
     }
   }
 
-  const handleUpdateRepoType = (type: string) => {
-    setRepoType(type);
-    handleFetchData(repoType, repoSort, repoDirection);
-  }
+  const handleTimeFormat = (time: string) => {
+    const date = new Date(time);
 
-  const handleUpdateRepoSort = (sort: string) => {
-    setRepoSort(sort);
-    handleFetchData(repoType, repoSort, repoDirection);
-  }
-
-  const handleUpdateRepoDirection = (direction: string) => {
-    setRepoDirection(direction);
-    handleFetchData(repoType, repoSort, repoDirection);
+    return date.toLocaleDateString();
   }
 
   // const filterControl = (name, value, label, hook) => {
@@ -118,8 +125,7 @@ function App() {
             <legend>{legend}</legend>
             {items.map(({value, label}) =>
               filterControl(name, value, label, hook)
-              )
-            }
+            )}
           </fieldset>
         )} */}
         <fieldset>
@@ -148,11 +154,19 @@ function App() {
           <label className="filterName" htmlFor="direction_asc">Asc</label>
         </fieldset>
       </header>
-      <ul>
+      <ul className="filterList">
         {
-          repos.loading? 'Loading Data...' : repos.data.map(({id, html_url, name}: Data) => (
-          <li key={id}>
+          repos.loading? 'Loading Data...' : repos.data.map(({id, html_url, name, updated_at, pushed_at, created_at}: Data) => (
+          <li className="filterItem" key={id}>
             <a href={html_url}>{name}</a>
+            <dl>
+              <dt>Updated on</dt>
+              <dd>{handleTimeFormat(updated_at)}</dd>
+              <dt>Latest Push on</dt>
+              <dd>{handleTimeFormat(pushed_at)}</dd>
+              <dt>Created on</dt>
+              <dd>{handleTimeFormat(created_at)}</dd>
+            </dl>
           </li>
           ))
         }

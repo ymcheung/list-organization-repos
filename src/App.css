@@ -4,6 +4,18 @@
   grid: auto / auto auto auto;
 }
 
+.filterList {
+  padding: 0
+}
+
+.filterItem {
+  max-width: 360px;
+  margin-bottom: 8px;
+  padding: 12px;
+  list-style: none;
+  border: 1px solid gray;
+}
+
 .filterName {
   margin-right: 8px;
 }
