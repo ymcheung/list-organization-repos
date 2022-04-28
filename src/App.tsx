@@ -4,7 +4,8 @@ import './App.css';
 interface FetchProps {(
   type: string,
   sort: string,
-  direction: string
+  direction: string,
+  page: number
   ): void;
 }
 
@@ -18,27 +19,27 @@ interface Data {
 }
 
 function App() {
-  const [repos, setRepos] = useState({
-    data: [],
-    loading: true
-  });
+  const [repos, setRepos] = useState([]);
   const [repoType, setRepoType] = useState('all');
   const [repoSort, setRepoSort] = useState('created');
   const [repoDirection, setRepoDirection] = useState('desc');
+  const [isLoading, setIsLoading] = useState(true);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [isFetching, setIsFetching] = useState(false);
 
   const handleUpdateRepoType = (type: string) => {
     setRepoType(type);
-    handleFetchData(repoType, repoSort, repoDirection);
+    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
   }
 
   const handleUpdateRepoSort = (sort: string) => {
     setRepoSort(sort);
-    handleFetchData(repoType, repoSort, repoDirection);
+    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
   }
 
   const handleUpdateRepoDirection = (direction: string) => {
     setRepoDirection(direction);
-    handleFetchData(repoType, repoSort, repoDirection);
+    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
   }
 
   // const filters = [{
@@ -82,21 +83,33 @@ function App() {
   //   }]
   // }];
 
-  const handleFetchData: FetchProps = async(type, sort, direction) => {
-    let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}&per_page=12`;
+  const handleFetchData: FetchProps = async(type, sort, direction, page) => {
+    let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}&per_page=12&page=${page}`;
+    const config = {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    };
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, config);
       const json = await res.json();
 
-      setRepos({
-        data: json,
-        loading: false
-      });
+      setRepos(json);
     } catch (error) {
       console.log('error', error);
     }
+    setIsLoading(false);
   }
+
+  const handleFetchingMoreRepos = () => {
+    let currentRepos = repos;
+    setPageNumber(current => current +1);
+    setRepos(currentRepos.concat(repos));
+
+    setIsFetching(false);
+  };
 
   const handleTimeFormat = (time: string) => {
     const date = new Date(time);
@@ -113,9 +126,27 @@ function App() {
   //   )
   // }
 
+  const handlePageBottom = () => {
+    console.log('scroll event');
+    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight)
+    return;
+
+    setIsFetching(true);
+  }
+
   useEffect(() => {
-    handleFetchData(repoType, repoSort, repoDirection);
-  }, [setRepos, repoDirection, repoSort, repoType]);
+    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
+
+    window.addEventListener('scroll', handlePageBottom);
+    return () => window.removeEventListener('scroll', handlePageBottom);
+
+  }, [setRepos, repoDirection, repoSort, repoType, isLoading, pageNumber]);
+
+  useEffect(() => {
+    if (!isFetching) return;
+
+    handleFetchingMoreRepos();
+  }, [isFetching]);
 
   return (
     <div className="App">
@@ -154,23 +185,27 @@ function App() {
           <label className="filterName" htmlFor="direction_asc">Asc</label>
         </fieldset>
       </header>
-      <ul className="filterList">
-        {
-          repos.loading? 'Loading Data...' : repos.data.map(({id, html_url, name, updated_at, pushed_at, created_at}: Data) => (
-          <li className="filterItem" key={id}>
-            <a href={html_url}>{name}</a>
-            <dl>
-              <dt>Updated on</dt>
-              <dd>{handleTimeFormat(updated_at)}</dd>
-              <dt>Latest Push on</dt>
-              <dd>{handleTimeFormat(pushed_at)}</dd>
-              <dt>Created on</dt>
-              <dd>{handleTimeFormat(created_at)}</dd>
-            </dl>
-          </li>
-          ))
-        }
-      </ul>
+      {isLoading ? 'Loading...' :
+        <ul className="filterList">
+          {
+            repos && repos.map(({id, html_url, name, updated_at, pushed_at, created_at}: Data, index: number) => (
+            <li className="filterItem" key={`${id}-${index}`}>
+              <a href={html_url}>{name}</a>
+              <dl>
+                <dt>Updated on</dt>
+                <dd>{handleTimeFormat(updated_at)}</dd>
+                <dt>Latest Push on</dt>
+                <dd>{handleTimeFormat(pushed_at)}</dd>
+                <dt>Created on</dt>
+                <dd>{handleTimeFormat(created_at)}</dd>
+              </dl>
+              N.O. {index + 1}
+            </li>
+            ))
+          }
+        </ul>
+      }
+      {isFetching && 'Fetching Repos'}
     </div>
   );
 }
