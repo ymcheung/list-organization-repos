@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 interface FetchProps {(
@@ -103,19 +103,48 @@ function App() {
     setIsLoading(false);
   }
 
-  const handleFetchingMoreRepos = () => {
-    let currentRepos = repos;
-    setPageNumber(current => current +1);
-    setRepos(currentRepos.concat(repos));
+  const handleFetchingMoreRepos = useCallback(() => {
+    setTimeout(() => {
+      const currentRepos = repos;
+      setPageNumber(current => current +1 );
+      handleFetchData(repoType, repoSort, repoDirection, pageNumber);
 
-    setIsFetching(false);
-  };
+      setRepos([...currentRepos, ...repos]);
+
+      setIsFetching(false);
+    }, 3500);
+  }, [pageNumber, repoDirection, repoSort, repoType, repos]);
 
   const handleTimeFormat = (time: string) => {
     const date = new Date(time);
 
     return date.toLocaleDateString();
   }
+
+  const handlePageBottom = useCallback(() => {
+    console.log('scroll event');
+    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight)
+    return;
+    if (isFetching) return;
+
+    setIsFetching(true);
+  }, [isFetching]);
+
+  useEffect(() => {
+    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
+
+  }, [setRepos, repoDirection, repoSort, repoType, isLoading, pageNumber]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handlePageBottom);
+    return () => window.removeEventListener('scroll', handlePageBottom);
+  },[handlePageBottom]);
+
+  useEffect(() => {
+    if (!isFetching) return;
+
+    handleFetchingMoreRepos();
+  }, [isFetching, handleFetchingMoreRepos]);
 
   // const filterControl = (name, value, label, hook) => {
   //   return(
@@ -125,28 +154,6 @@ function App() {
   //     </>
   //   )
   // }
-
-  const handlePageBottom = () => {
-    console.log('scroll event');
-    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight)
-    return;
-
-    setIsFetching(true);
-  }
-
-  useEffect(() => {
-    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
-
-    window.addEventListener('scroll', handlePageBottom);
-    return () => window.removeEventListener('scroll', handlePageBottom);
-
-  }, [setRepos, repoDirection, repoSort, repoType, isLoading, pageNumber]);
-
-  useEffect(() => {
-    if (!isFetching) return;
-
-    handleFetchingMoreRepos();
-  }, [isFetching]);
 
   return (
     <div className="App">
