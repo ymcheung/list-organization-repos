@@ -23,9 +23,8 @@ function App() {
   const [repoType, setRepoType] = useState('all');
   const [repoSort, setRepoSort] = useState('created');
   const [repoDirection, setRepoDirection] = useState('desc');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
-  const [isFetching, setIsFetching] = useState(false);
 
   const handleUpdateRepoType = (type: string) => {
     setRepoType(type);
@@ -93,27 +92,17 @@ function App() {
     };
 
     try {
+      setIsLoading(true);
       const res = await fetch(url, config);
       const json = await res.json();
 
       setRepos(json);
     } catch (error) {
       console.log('error', error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
-
-  const handleFetchingMoreRepos = useCallback(() => {
-    setTimeout(() => {
-      const currentRepos = repos;
-      setPageNumber(current => current +1 );
-      handleFetchData(repoType, repoSort, repoDirection, pageNumber);
-
-      setRepos([...currentRepos, ...repos]);
-
-      setIsFetching(false);
-    }, 3500);
-  }, [pageNumber, repoDirection, repoSort, repoType, repos]);
 
   const handleTimeFormat = (time: string) => {
     const date = new Date(time);
@@ -122,18 +111,16 @@ function App() {
   }
 
   const handlePageBottom = useCallback(() => {
-    console.log('scroll event');
-    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight)
-    return;
-    if (isFetching) return;
+    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
+    if (isLoading) return;
 
-    setIsFetching(true);
-  }, [isFetching]);
+    setPageNumber(current => current + 1);
+  }, [isLoading]);
 
   useEffect(() => {
     handleFetchData(repoType, repoSort, repoDirection, pageNumber);
 
-  }, [setRepos, repoDirection, repoSort, repoType, isLoading, pageNumber]);
+  }, [repoDirection, repoSort, repoType, pageNumber]);
 
   useEffect(() => {
     window.addEventListener('scroll', handlePageBottom);
@@ -141,10 +128,16 @@ function App() {
   },[handlePageBottom]);
 
   useEffect(() => {
-    if (!isFetching) return;
+    if (!isLoading) return;
+    // setTimeout(() => {
+      const currentRepos = repos;
+      handleFetchData(repoType, repoSort, repoDirection, pageNumber);
 
-    handleFetchingMoreRepos();
-  }, [isFetching, handleFetchingMoreRepos]);
+      setRepos([...currentRepos, ...repos]);
+
+      setIsLoading(false);
+    // }, 3500);
+  },[repoType, repoSort, repoDirection, pageNumber, repos, isLoading]);
 
   // const filterControl = (name, value, label, hook) => {
   //   return(
@@ -192,10 +185,10 @@ function App() {
           <label className="filterName" htmlFor="direction_asc">Asc</label>
         </fieldset>
       </header>
-      {isLoading ? 'Loading...' :
+      {repos &&
         <ul className="filterList">
           {
-            repos && repos.map(({id, html_url, name, updated_at, pushed_at, created_at}: Data, index: number) => (
+            repos.map(({id, html_url, name, updated_at, pushed_at, created_at}: Data, index: number) => (
             <li className="filterItem" key={`${id}-${index}`}>
               <a href={html_url}>{name}</a>
               <dl>
@@ -212,7 +205,7 @@ function App() {
           }
         </ul>
       }
-      {isFetching && 'Fetching Repos'}
+      {isLoading && 'Fetching Repos'}
     </div>
   );
 }
