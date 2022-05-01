@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 
 interface FetchProps {(
@@ -23,22 +23,29 @@ function App() {
   const [repoType, setRepoType] = useState('all');
   const [repoSort, setRepoSort] = useState('created');
   const [repoDirection, setRepoDirection] = useState('desc');
-  const [isLoading, setIsLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
+
+  const repoTypeRef = useRef('all');
+  const repoSortRef = useRef('created');
+  const repoDirectionRef = useRef('desc');
+  const pageNumberRef = useRef(1);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [noData, setNoData] = useState(false);
 
   const handleUpdateRepoType = (type: string) => {
     setRepoType(type);
-    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
+    handleFetchRepos(repoType, repoSortRef.current, repoDirectionRef.current, pageNumberRef.current);
   }
 
   const handleUpdateRepoSort = (sort: string) => {
     setRepoSort(sort);
-    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
+    handleFetchRepos(repoTypeRef.current, repoSort, repoDirectionRef.current, pageNumberRef.current);
   }
 
   const handleUpdateRepoDirection = (direction: string) => {
     setRepoDirection(direction);
-    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
+    handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirection, pageNumberRef.current);
   }
 
   // const filters = [{
@@ -82,7 +89,7 @@ function App() {
   //   }]
   // }];
 
-  const handleFetchData: FetchProps = async(type, sort, direction, page) => {
+  const handleFetchRepos: FetchProps = useCallback(async(type, sort, direction, page) => {
     let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}&per_page=12&page=${page}`;
     const config = {
       method: 'GET',
@@ -93,16 +100,45 @@ function App() {
 
     try {
       setIsLoading(true);
+
       const res = await fetch(url, config);
       const json = await res.json();
 
-      setRepos(json);
+      // setRepos((prevState) => prevState ? [...prevState, ...json] : json);
+      console.log('update repos')
+      json.length === 0 && setNoData(true);
+      if (noData) {
+        setIsLoading(false);
+        return;
+      }
+
+      setRepos((prevState) => prevState ? [...prevState.slice(11 * (pageNumberRef.current - 1)), ...json] : json);
     } catch (error) {
       console.log('error', error);
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [noData]);
+
+  const handleFetchMoreRepos = useCallback(() => {
+    setTimeout(() => {
+      console.log('hit passing fetch more repos conditions')
+
+      pageNumberRef.current = pageNumber;
+      handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirectionRef.current, pageNumberRef.current);
+
+      setIsLoading(false);
+    }, 3000);
+  }, [handleFetchRepos, pageNumber]);
+
+  const handlePageBottom = useCallback(() => {
+    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
+    if (isLoading) return;
+
+    console.log('hit page bottom')
+    setPageNumber(prevState => prevState + 1);
+    handleFetchMoreRepos();
+  }, [handleFetchMoreRepos, isLoading]);
 
   const handleTimeFormat = (time: string) => {
     const date = new Date(time);
@@ -110,34 +146,14 @@ function App() {
     return date.toLocaleDateString();
   }
 
-  const handlePageBottom = useCallback(() => {
-    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
-    if (isLoading) return;
-
-    setPageNumber(current => current + 1);
-  }, [isLoading]);
-
   useEffect(() => {
-    handleFetchData(repoType, repoSort, repoDirection, pageNumber);
-
-  }, [repoDirection, repoSort, repoType, pageNumber]);
+    handleFetchRepos(repoType, repoSort, repoDirection, pageNumber);
+  }, [handleFetchRepos, pageNumber, repoDirection, repoSort, repoType]);
 
   useEffect(() => {
     window.addEventListener('scroll', handlePageBottom);
     return () => window.removeEventListener('scroll', handlePageBottom);
   },[handlePageBottom]);
-
-  useEffect(() => {
-    if (!isLoading) return;
-    // setTimeout(() => {
-      const currentRepos = repos;
-      handleFetchData(repoType, repoSort, repoDirection, pageNumber);
-
-      setRepos([...currentRepos, ...repos]);
-
-      setIsLoading(false);
-    // }, 3500);
-  },[repoType, repoSort, repoDirection, pageNumber, repos, isLoading]);
 
   // const filterControl = (name, value, label, hook) => {
   //   return(
@@ -205,7 +221,7 @@ function App() {
           }
         </ul>
       }
-      {isLoading && 'Fetching Repos'}
+      {isLoading && 'Loading Repos'}
     </div>
   );
 }
