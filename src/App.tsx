@@ -30,21 +30,25 @@ function App() {
   const repoDirectionRef = useRef('desc');
   const pageNumberRef = useRef(1);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [noData, setNoData] = useState(false);
 
   const handleUpdateRepoType = (type: string) => {
     setRepoType(type);
+    pageNumberRef.current = 1;
     handleFetchRepos(repoType, repoSortRef.current, repoDirectionRef.current, pageNumberRef.current);
   }
 
   const handleUpdateRepoSort = (sort: string) => {
     setRepoSort(sort);
+    pageNumberRef.current = 1;
     handleFetchRepos(repoTypeRef.current, repoSort, repoDirectionRef.current, pageNumberRef.current);
   }
 
   const handleUpdateRepoDirection = (direction: string) => {
     setRepoDirection(direction);
+    pageNumberRef.current = 1;
     handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirection, pageNumberRef.current);
   }
 
@@ -99,8 +103,6 @@ function App() {
     };
 
     try {
-      setIsLoading(true);
-
       const res = await fetch(url, config);
       const json = await res.json();
 
@@ -112,7 +114,9 @@ function App() {
 
       if (page === 1) {
         setRepos(json);
+        console.log('hit 1st page')
       } else {
+        console.log('hit 2+ pages')
         setRepos((prevState) => prevState ? [...prevState, ...json] : json);
       }
     } catch (error) {
@@ -123,21 +127,22 @@ function App() {
   }, [noData]);
 
   const handleFetchMoreRepos = useCallback(() => {
-    if (pageNumberRef.current === pageNumber) return;
+    setPageNumber(prevState => prevState + 1);
+    pageNumberRef.current = pageNumber;
+
     setTimeout(() => {
       handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirectionRef.current, pageNumber);
 
-      setIsLoading(false);
+      setIsFetching(false);
     }, 1000);
   }, [handleFetchRepos, pageNumber]);
 
   const handlePageBottom = useCallback(() => {
     if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
-    if (isLoading) return;
+    if (isFetching) return;
 
-    setPageNumber(prevState => prevState + 1);
     handleFetchMoreRepos();
-  }, [handleFetchMoreRepos, isLoading]);
+  }, [handleFetchMoreRepos, isFetching]);
 
   const handleTimeFormat = (time: string) => {
     const date = new Date(time);
@@ -220,7 +225,8 @@ function App() {
           }
         </ul>
       }
-      {isLoading && 'Loading Repos'}
+      {isLoading && 'Loading Repos...'}
+      {isFetching && 'Loading More Repos...'}
     </div>
   );
 }
