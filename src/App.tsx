@@ -35,17 +35,17 @@ function App() {
 
   const handleUpdateRepoType = (type: string) => {
     setRepoType(type);
-    handleFetchRepos(repoType, repoSortRef.current, repoDirectionRef.current, 1);
+    handleFetchRepos(repoType, repoSortRef.current, repoDirectionRef.current, pageNumberRef.current);
   }
 
   const handleUpdateRepoSort = (sort: string) => {
     setRepoSort(sort);
-    handleFetchRepos(repoTypeRef.current, repoSort, repoDirectionRef.current, 1);
+    handleFetchRepos(repoTypeRef.current, repoSort, repoDirectionRef.current, pageNumberRef.current);
   }
 
   const handleUpdateRepoDirection = (direction: string) => {
     setRepoDirection(direction);
-    handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirection, 1);
+    handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirection, pageNumberRef.current);
   }
 
   // const filters = [{
