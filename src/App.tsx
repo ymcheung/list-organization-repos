@@ -35,17 +35,17 @@ function App() {
 
   const handleUpdateRepoType = (type: string) => {
     setRepoType(type);
-    handleFetchRepos(repoType, repoSortRef.current, repoDirectionRef.current, pageNumberRef.current);
+    handleFetchRepos(repoType, repoSortRef.current, repoDirectionRef.current, 1);
   }
 
   const handleUpdateRepoSort = (sort: string) => {
     setRepoSort(sort);
-    handleFetchRepos(repoTypeRef.current, repoSort, repoDirectionRef.current, pageNumberRef.current);
+    handleFetchRepos(repoTypeRef.current, repoSort, repoDirectionRef.current, 1);
   }
 
   const handleUpdateRepoDirection = (direction: string) => {
     setRepoDirection(direction);
-    handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirection, pageNumberRef.current);
+    handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirection, 1);
   }
 
   // const filters = [{
@@ -104,15 +104,17 @@ function App() {
       const res = await fetch(url, config);
       const json = await res.json();
 
-      // setRepos((prevState) => prevState ? [...prevState, ...json] : json);
-      console.log('update repos')
       json.length === 0 && setNoData(true);
       if (noData) {
         setIsLoading(false);
         return;
       }
 
-      setRepos((prevState) => prevState ? [...prevState.slice(11 * (pageNumberRef.current - 1)), ...json] : json);
+      if (page === 1) {
+        setRepos(json);
+      } else {
+        setRepos((prevState) => prevState ? [...prevState, ...json] : json);
+      }
     } catch (error) {
       console.log('error', error);
     } finally {
@@ -121,21 +123,18 @@ function App() {
   }, [noData]);
 
   const handleFetchMoreRepos = useCallback(() => {
+    if (pageNumberRef.current === pageNumber) return;
     setTimeout(() => {
-      console.log('hit passing fetch more repos conditions')
-
-      pageNumberRef.current = pageNumber;
-      handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirectionRef.current, pageNumberRef.current);
+      handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirectionRef.current, pageNumber);
 
       setIsLoading(false);
-    }, 3000);
+    }, 1000);
   }, [handleFetchRepos, pageNumber]);
 
   const handlePageBottom = useCallback(() => {
     if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
     if (isLoading) return;
 
-    console.log('hit page bottom')
     setPageNumber(prevState => prevState + 1);
     handleFetchMoreRepos();
   }, [handleFetchMoreRepos, isLoading]);
