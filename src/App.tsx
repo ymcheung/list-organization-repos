@@ -1,15 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import './App.css';
+import React, { useState, useEffect, useCallback } from 'react';
+import "./App.css";
 
-interface FetchProps {(
-  type: string,
-  sort: string,
-  direction: string,
-  page: number
-  ): void;
-}
-
-interface Data {
+interface ApiProps {
   id: string;
   html_url: string;
   name: string;
@@ -18,87 +10,33 @@ interface Data {
   created_at: string;
 }
 
-function App() {
-  const [repos, setRepos] = useState([]);
-  const [repoType, setRepoType] = useState('all');
-  const [repoSort, setRepoSort] = useState('created');
-  const [repoDirection, setRepoDirection] = useState('desc');
-  const [pageNumber, setPageNumber] = useState(1);
+interface FilterInputProps {
+  name: string;
+  value: string;
+  label: string;
+  hook: string;
+}
 
-  const repoTypeRef = useRef('all');
-  const repoSortRef = useRef('created');
-  const repoDirectionRef = useRef('desc');
-  const pageNumberRef = useRef(1);
+export default function App() {
+  const [repos, setRepos] = useState([]);
+  const [form, setForm] = useState({
+    type: 'all',
+    sort: 'created',
+    direction: 'desc',
+    page: 1
+  });
 
   const [isLoading, setIsLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
   const [noData, setNoData] = useState(false);
 
-  const handleUpdateRepoType = (type: string) => {
-    setRepoType(type);
-    pageNumberRef.current = 1;
-    handleFetchRepos(repoType, repoSortRef.current, repoDirectionRef.current, pageNumberRef.current);
-  }
-
-  const handleUpdateRepoSort = (sort: string) => {
-    setRepoSort(sort);
-    pageNumberRef.current = 1;
-    handleFetchRepos(repoTypeRef.current, repoSort, repoDirectionRef.current, pageNumberRef.current);
-  }
-
-  const handleUpdateRepoDirection = (direction: string) => {
-    setRepoDirection(direction);
-    pageNumberRef.current = 1;
-    handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirection, pageNumberRef.current);
-  }
-
-  // const filters = [{
-  //   name: 'type',
-  //   legend: 'Repos Type',
-  //   hook: repoType,
-  //   items: [{
-  //     value: 'all',
-  //     label: 'All'
-  //   }, {
-  //     value: 'forks',
-  //     label: 'Forks'
-  //   }]
-  // }, {
-  //   name: 'sort',
-  //   legend: 'Sort',
-  //   hook: repoSort,
-  //   items: [{
-  //     value: 'created',
-  //     label: 'Created Time'
-  //   }, {
-  //     value: 'updated',
-  //     label: 'Updated Time'
-  //   }, {
-  //     value: 'pushed',
-  //     label: 'Pushed Time'
-  //   }, {
-  //     value: 'full_name',
-  //     label: 'Full Name'
-  //   }]
-  // }, {
-  //   name: 'direction',
-  //   legend: 'Direction',
-  //   hook: repoDirection,
-  //   items: [{
-  //     value: 'desc',
-  //     label: 'Descending'
-  //   }, {
-  //     value: 'asc',
-  //     label: 'Ascending'
-  //   }]
-  // }];
-
-  const handleFetchRepos: FetchProps = useCallback(async(type, sort, direction, page) => {
+  const handleFetchRepos = useCallback(async () => {
+    const { type, sort, direction, page } = form;
     let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}&per_page=12&page=${page}`;
     const config = {
       method: 'GET',
       headers: {
-        'Accept': 'application/vnd.github.v3+json'
+        Accept: 'application/vnd.github.v3+json'
       }
     };
 
@@ -106,7 +44,9 @@ function App() {
       const res = await fetch(url, config);
       const json = await res.json();
 
-      json.length === 0 && setNoData(true);
+      if (json.length === 0) {
+        setNoData(true);
+      }
       if (noData) {
         setIsLoading(false);
         return;
@@ -114,121 +54,152 @@ function App() {
 
       if (page === 1) {
         setRepos(json);
-        console.log('hit 1st page')
       } else {
-        console.log('hit 2+ pages')
-        setRepos((prevState) => prevState ? [...prevState, ...json] : json);
+        setRepos((prevState) => (prevState ? [...prevState, ...json] : json));
       }
+
+      setIsFetching(false);
     } catch (error) {
       console.log('error', error);
     } finally {
       setIsLoading(false);
     }
-  }, [noData]);
+  }, [noData, form]);
 
-  const handleFetchMoreRepos = useCallback(() => {
-    setPageNumber(prevState => prevState + 1);
-    pageNumberRef.current = pageNumber;
-
-    setTimeout(() => {
-      handleFetchRepos(repoTypeRef.current, repoSortRef.current, repoDirectionRef.current, pageNumber);
-
-      setIsFetching(false);
-    }, 1000);
-  }, [handleFetchRepos, pageNumber]);
+  const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((prevState) => ({
+      ...prevState,
+      [event.target.name]: event.target.value,
+      page: 1
+    }));
+  };
 
   const handlePageBottom = useCallback(() => {
     if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
-    if (isFetching) return;
 
-    handleFetchMoreRepos();
-  }, [handleFetchMoreRepos, isFetching]);
+    if (!isFetching) {
+      setForm((prevState) => ({
+        ...prevState,
+        page: prevState.page + 1
+      }));
+      setIsFetching(true);
+    }
+  }, [isFetching]);
 
   const handleTimeFormat = (time: string) => {
     const date = new Date(time);
-
     return date.toLocaleDateString();
-  }
+  };
 
   useEffect(() => {
-    handleFetchRepos(repoType, repoSort, repoDirection, pageNumber);
-  }, [handleFetchRepos, pageNumber, repoDirection, repoSort, repoType]);
+    handleFetchRepos();
+  }, [form, handleFetchRepos]);
 
   useEffect(() => {
     window.addEventListener('scroll', handlePageBottom);
     return () => window.removeEventListener('scroll', handlePageBottom);
-  },[handlePageBottom]);
+  }, [handlePageBottom]);
 
-  // const filterControl = (name, value, label, hook) => {
-  //   return(
-  //     <>
-  //       <input id={`${name}_${value}`} type="radio" name={name} value={value} checked={hook === value} onChange={({ target }) => handleUpdateRepoType(target.value)} />
-  //       <label className="filterName" htmlFor={`${name}_${value}`}>{label}</label>
-  //     </>
-  //   )
-  // }
+  const filters = [{
+    legend: 'Repos Type',
+    name: 'type',
+    hook: form.type,
+    items: [{
+        value: 'all',
+        label: 'All'
+      }, {
+        value: 'forks',
+        label: 'Forks'
+      }
+    ]
+  }, {
+    legend: 'Sort',
+    name: 'sort',
+    hook: form.sort,
+    items: [{
+        value: 'created',
+        label: 'Created Time'
+      }, {
+        value: 'updated',
+        label: 'Updated Time'
+      }, {
+        value: 'pushed',
+        label: 'Pushed Time'
+      }, {
+        value: 'full_name',
+        label: 'Full Name'
+      }
+    ]
+  }, {
+    legend: 'Direction',
+    name: 'direction',
+    hook: form.direction,
+    items: [{
+        value: 'desc',
+        label: 'Ascending'
+      }, {
+        value: 'asc',
+        label: 'Descending'
+      }
+    ]
+  }];
+
+  const FilterInput = ({name, value, label, hook}: FilterInputProps) => {
+    return(
+      <>
+        <input
+          id={`${name}_${value}`}
+          type="radio"
+          name={name}
+          value={value}
+          checked={hook === value}
+          onChange={handleOnChange}
+        />
+        <label className="filterName" htmlFor={`${name}_${value}`}>
+          {label}
+        </label>
+      </>
+    );
+  }
 
   return (
     <div className="App">
       <header className="filter">
-        {/* {filters.map(({name, legend, hook, items}) =>
-          <fieldset>
+        {filters.map(({legend, name, items, hook}) => (
+          <fieldset key={name}>
             <legend>{legend}</legend>
-            {items.map(({value, label}) =>
-              filterControl(name, value, label, hook)
+            {items.map(({value, label}) => (
+                <FilterInput name={name} value={value} label={label} hook={hook} key={value} />
+              )
             )}
           </fieldset>
-        )} */}
-        <fieldset>
-          <legend>Repos Type</legend>
-          <input id="type_all" type="radio" name="type" value="all" checked={repoType === 'all'} onChange={({ target }) => handleUpdateRepoType(target.value)} />
-          <label className="filterName" htmlFor="type_all">All</label>
-          <input id="type_forks" type="radio" name="type" value="forks" checked={repoType === 'forks'} onChange={({ target }) => handleUpdateRepoType(target.value)} />
-          <label className="filterName" htmlFor="type_forks">Forks</label>
-        </fieldset>
-        <fieldset>
-          <legend>Sort</legend>
-          <input id="sort_created" type="radio" name="sort" value="created" checked={repoSort === 'created'} onChange={({ target }) => handleUpdateRepoSort(target.value)}  />
-          <label className="filterName" htmlFor="sort_created">Created Time</label>
-          <input id="sort_updated" type="radio" name="sort" value="updated" checked={repoSort === 'updated'} onChange={({ target }) => handleUpdateRepoSort(target.value)} />
-          <label className="filterName" htmlFor="sort_updated">Updated Time</label>
-          <input id="sort_pushed" type="radio" name="sort" value="pushed" checked={repoSort === 'pushed'} onChange={({ target }) => handleUpdateRepoSort(target.value)} />
-          <label className="filterName" htmlFor="sort_pushed">Pushed Time</label>
-          <input id="sort_full_name" type="radio" name="sort" value="full_name" checked={repoSort === 'full_name'} onChange={({ target }) => handleUpdateRepoSort(target.value)} />
-          <label className="filterName" htmlFor="sort_full_name">Full Name</label>
-        </fieldset>
-        <fieldset>
-          <legend>Direction</legend>
-          <input id="direction_desc" type="radio" name="direction" value="desc" checked={repoDirection === 'desc'} onChange={({ target }) => handleUpdateRepoDirection(target.value)} />
-          <label className="filterName" htmlFor="direction_desc">Desc</label>
-          <input id="direction_asc" type="radio" name="direction" value="asc" checked={repoDirection === 'asc'} onChange={({ target}) => handleUpdateRepoDirection(target.value)} />
-          <label className="filterName" htmlFor="direction_asc">Asc</label>
-        </fieldset>
+          )
+        )}
       </header>
-      {repos &&
+      {repos && (
         <ul className="filterList">
-          {
-            repos.map(({id, html_url, name, updated_at, pushed_at, created_at}: Data, index: number) => (
-            <li className="filterItem" key={`${id}-${index}`}>
-              <a href={html_url}>{name}</a>
-              <dl>
-                <dt>Updated on</dt>
-                <dd>{handleTimeFormat(updated_at)}</dd>
-                <dt>Latest Push on</dt>
-                <dd>{handleTimeFormat(pushed_at)}</dd>
-                <dt>Created on</dt>
-                <dd>{handleTimeFormat(created_at)}</dd>
-              </dl>
-              N.O. {index + 1}
-            </li>
-            ))
-          }
+          {repos.map(
+            (
+              { id, html_url, name, updated_at, pushed_at, created_at }: ApiProps,
+              index: number
+            ) => (
+              <li className="filterItem" key={id}>
+                <a href={html_url}>{name}</a>
+                <dl>
+                  <dt>Updated on</dt>
+                  <dd>{handleTimeFormat(updated_at)}</dd>
+                  <dt>Latest Push on</dt>
+                  <dd>{handleTimeFormat(pushed_at)}</dd>
+                  <dt>Created on</dt>
+                  <dd>{handleTimeFormat(created_at)}</dd>
+                </dl>
+              </li>
+            )
+          )}
         </ul>
-      }
+      )}
       {isLoading && 'Loading Repos...'}
       {isFetching && 'Loading More Repos...'}
     </div>
   );
 }
-
-export default App;
