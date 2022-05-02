@@ -1,46 +1,33 @@
-# Getting Started with Create React App
+# 線上 Demo
+https://list-organization-repos.vercel.app/
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 安裝與啟動
 
-## Available Scripts
+1. `git clone https://github.com/ymcheung/list-oˋrganization-repos`
+2. `npm install`
+3. `npm run start`
 
-In the project directory, you can run:
+# 說明
 
-### `npm start`
+一打開頁面，列出 12 筆 [Dcard](https://github.com/dcard) 公司在 Github 放置的公開 Repository。
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+滾至頁面底端後，再讀取 12 筆，直到沒有資料即停止。
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+更新 Type、Sort 與 Direction 之後，會從第 1 筆資料重新顯示
 
-### `npm test`
+## Repos Type
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- All (預設): 所有 Repository
+- Forks: 僅列出從它處 Fork 回來的 Repository
 
-### `npm run build`
+## Sort
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Created Time (預設): 創建 Repo 的時間
+- Updated Time: Repo 更新的時間
+- Pushed Time: 最近 Push 上 Github 的時間
+- Full Name: 全名
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Direction
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Descend: 降冪排列
+- Ascend: 升冪排列

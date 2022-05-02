@@ -8,6 +8,7 @@ interface ApiProps {
   updated_at: string;
   pushed_at: string;
   created_at: string;
+  language: string;
 }
 
 interface FilterInputProps {
@@ -34,7 +35,7 @@ export default function App() {
     const { type, sort, direction, page } = form;
 
     const hostname = `https://api.github.com`;
-    const path = '/orgs/vercel/repos';
+    const path = '/orgs/dcard/repos';
     let params = `?type=${type}&sort=${sort}&direction=${direction}&per_page=12&page=${page}`;
 
     const config = {
@@ -181,7 +182,7 @@ export default function App() {
       </header>
       {repos && (
         <ul className="filterList">
-          {repos.map(({ id, html_url, name, updated_at, pushed_at, created_at }: ApiProps) => (
+          {repos.map(({ id, html_url, name, updated_at, pushed_at, created_at, language }: ApiProps) => (
               <li className="filterItem" key={id}>
                 <a href={html_url}>{name}</a>
                 <dl>
@@ -191,6 +192,13 @@ export default function App() {
                   <dd>{handleTimeFormat(pushed_at)}</dd>
                   <dt>Created on</dt>
                   <dd>{handleTimeFormat(created_at)}</dd>
+                  {
+                    language &&
+                    <>
+                      <dt>Language</dt>
+                      <dd>{language}</dd>
+                    </>
+                  }
                 </dl>
               </li>
             )
