@@ -1,13 +1,11 @@
-# 線上 Demo
-https://list-organization-repos.vercel.app/
-
-# 說明
-
 使用 React Hooks 列出 Github 的 [Repositories API](https://docs.github.com/en/rest/repos/repos#list-organization-repositories)。
 
 一打開頁面，抓取 12 筆 [Dcard](https://github.com/dcard) 公司的公開 Repository。
 
 滾至頁面底端後，繼續加上 12 筆，直到沒有資料即停止。
+
+# 線上 Demo
+https://list-organization-repos.vercel.app/
 
 # 安裝與啟動
 
@@ -35,12 +33,13 @@ https://list-organization-repos.vercel.app/
 - Descend: 降冪排列
 - Ascend: 升冪排列
 
-# 說明
+# 細節說明
 
 1. `fetch` 取得資料，轉為 `json` 陣列
 2. 將 `json` 陣列儲存至 `useState` Hooks，取名 `repos`。
 
 接著有兩種功能：
+
 ## Filter
 
 3. 按 Input Radio，將 `<input>` 的 `name` 和 `value` 更新 Hooks state 變數 `form` 的資料，`form.page` 設定為 1。
@@ -56,10 +55,11 @@ https://list-organization-repos.vercel.app/
 # 限制
 
 - 更新 Type、Sort 與 Direction 之後，會從第 1 筆資料重新顯示。
-- 沒有設定 Authorization 的情況下，Github API 每個 IP [每小時只能存取 60 次](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#checking-your-rate-limit-status)
+- 沒有設定 Authorization 的 `fetch`，每個 IP [每小時只能存取 60 次](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#checking-your-rate-limit-status)
 
 # 還可以更好
 
+- 設定 Authorization，使得每小時可以 `fetch` 的次數達 5,000 次
 - 監聽 `scroll` 事件使用 `throttle` 控制數量
 
 # 輔助工具
