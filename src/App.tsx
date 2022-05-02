@@ -32,7 +32,11 @@ export default function App() {
 
   const handleFetchRepos = useCallback(async () => {
     const { type, sort, direction, page } = form;
-    let url = `https://api.github.com/orgs/vercel/repos?type=${type}&sort=${sort}&direction=${direction}&per_page=12&page=${page}`;
+
+    const hostname = `https://api.github.com`;
+    const path = '/orgs/vercel/repos';
+    let params = `?type=${type}&sort=${sort}&direction=${direction}&per_page=12&page=${page}`;
+
     const config = {
       method: 'GET',
       headers: {
@@ -41,7 +45,7 @@ export default function App() {
     };
 
     try {
-      const res = await fetch(url, config);
+      const res = await fetch(hostname + path + params, config);
       const json = await res.json();
 
       if (json.length === 0) {
@@ -64,7 +68,7 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [noData, form]);
+  }, [form, noData]);
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prevState) => ({
@@ -76,14 +80,14 @@ export default function App() {
 
   const handlePageBottom = useCallback(() => {
     if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
+    if (isFetching) return;
 
-    if (!isFetching) {
-      setForm((prevState) => ({
-        ...prevState,
-        page: prevState.page + 1
-      }));
-      setIsFetching(true);
-    }
+    setForm((prevState) => ({
+      ...prevState,
+      page: prevState.page + 1
+    }));
+
+    setIsFetching(true);
   }, [isFetching]);
 
   const handleTimeFormat = (time: string) => {
@@ -136,10 +140,10 @@ export default function App() {
     hook: form.direction,
     items: [{
         value: 'desc',
-        label: 'Ascending'
+        label: 'Descend'
       }, {
         value: 'asc',
-        label: 'Descending'
+        label: 'Ascend'
       }
     ]
   }];
@@ -169,20 +173,15 @@ export default function App() {
           <fieldset key={name}>
             <legend>{legend}</legend>
             {items.map(({value, label}) => (
-                <FilterInput name={name} value={value} label={label} hook={hook} key={value} />
-              )
-            )}
+              <FilterInput name={name} value={value} label={label} hook={hook} key={value} />
+            ))}
           </fieldset>
           )
         )}
       </header>
       {repos && (
         <ul className="filterList">
-          {repos.map(
-            (
-              { id, html_url, name, updated_at, pushed_at, created_at }: ApiProps,
-              index: number
-            ) => (
+          {repos.map(({ id, html_url, name, updated_at, pushed_at, created_at }: ApiProps) => (
               <li className="filterItem" key={id}>
                 <a href={html_url}>{name}</a>
                 <dl>
