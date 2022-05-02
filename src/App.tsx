@@ -54,6 +54,7 @@ export default function App() {
       }
       if (noData) {
         setIsLoading(false);
+        setIsFetching(false);
         return;
       }
 
@@ -205,8 +206,10 @@ export default function App() {
           )}
         </ul>
       )}
-      {isLoading && 'Loading Repos...'}
-      {isFetching && 'Loading More Repos...'}
+      <div className="stateDescription">
+        {isLoading && 'Loading Repos...'}
+        {isFetching && 'Loading More Repos...'}
+      </div>
     </div>
   );
 }
