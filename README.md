@@ -12,7 +12,7 @@ https://list-organization-repos.vercel.app/
 1. `git clone https://github.com/ymcheung/list-organization-repos`
 2. `cd list-organization-repos`
 3. `npm install`
-4. `npm run start`
+4. `npm start`
 
 # 資料
 
