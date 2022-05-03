@@ -52,9 +52,9 @@ export default function App() {
       if (json.length === 0) {
         setNoData(true);
       }
+
       if (noData) {
         setIsLoading(false);
-        setIsFetching(false);
         return;
       }
 
@@ -83,6 +83,7 @@ export default function App() {
   const handlePageBottom = useCallback(() => {
     if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
     if (isFetching) return;
+    if (noData) return;
 
     setForm((prevState) => ({
       ...prevState,
@@ -90,7 +91,7 @@ export default function App() {
     }));
 
     setIsFetching(true);
-  }, [isFetching]);
+  }, [isFetching, noData]);
 
   const handleTimeFormat = (time: string) => {
     const date = new Date(time);

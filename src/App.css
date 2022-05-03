@@ -1,7 +1,7 @@
 
 .filter {
-  display: grid;
-  grid: auto / auto auto auto;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .filterList {
