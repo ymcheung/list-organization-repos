@@ -14,6 +14,12 @@ https://list-organization-repos.vercel.app/
 3. `npm install`
 4. `npm start`
 
+## 設定 Personal Access Token
+
+1. `cp .env.sample .env`
+2. [取得 Personal Access Token](https://github.com/settings/tokens)
+3. 取代 `REACT_APP_GITHUB_PERSONAL` 的值
+
 # 資料
 
 ## Repos Type
@@ -55,12 +61,11 @@ https://list-organization-repos.vercel.app/
 # 限制
 
 - 更新 Type、Sort 與 Direction 之後，會從第 1 筆資料重新顯示。
-- 沒有設定 Authorization 的 `fetch`，每個 IP [每小時只能存取 60 次](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#checking-your-rate-limit-status)
 
 # 還可以更好
 
-- [x] 設定 Authorization，使得每小時可以 `fetch` 的次數達 5,000 次
 - [ ] 監聽 `scroll` 事件使用 `throttle` 控制數量
+- [x] 沒有設定 Authorization 的 `fetch`，每個 IP [每小時只能存取 60 次](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#checking-your-rate-limit-status)。加上 Authorization 後，使得每小時可以 `fetch` 的次數達 5,000 次
 
 # 輔助工具
 
