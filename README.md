@@ -59,8 +59,8 @@ https://list-organization-repos.vercel.app/
 
 # 還可以更好
 
-- 設定 Authorization，使得每小時可以 `fetch` 的次數達 5,000 次
-- 監聽 `scroll` 事件使用 `throttle` 控制數量
+- [x] 設定 Authorization，使得每小時可以 `fetch` 的次數達 5,000 次
+- [ ] 監聽 `scroll` 事件使用 `throttle` 控制數量
 
 # 輔助工具
 
