@@ -194,8 +194,7 @@ export default function App() {
                   <dd>{handleTimeFormat(pushed_at)}</dd>
                   <dt>Created on</dt>
                   <dd>{handleTimeFormat(created_at)}</dd>
-                  {
-                    language &&
+                  {language &&
                     <>
                       <dt>Language</dt>
                       <dd>{language}</dd>
@@ -207,10 +206,12 @@ export default function App() {
           )}
         </ul>
       )}
-      <div className="stateDescription">
-        {isLoading && 'Loading Repos...'}
-        {isFetching && 'Loading More Repos...'}
-      </div>
+      {(isLoading || isFetching) &&
+        <div className="stateDescription">
+          {isLoading && 'Loading Repos...'}
+          {isFetching && 'Loading More Repos...'}
+        </div>
+      }
     </div>
   );
 }
