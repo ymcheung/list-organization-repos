@@ -16,6 +16,8 @@ https://list-organization-repos.vercel.app/
 
 ## 設定 Personal Access Token
 
+不用設定 Authorization 的成品，請切換至 [feature/remove-authorization](https://github.com/ymcheung/list-organization-repos/tree/feature/remove-authorization) 分支。
+
 1. `cp .env.sample .env`
 2. [取得 Personal Access Token](https://github.com/settings/tokens)
 3. 取代 `REACT_APP_GITHUB_PERSONAL` 的值
