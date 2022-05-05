@@ -66,7 +66,7 @@ https://list-organization-repos.vercel.app/
 
 # 還可以更好
 
-- [ ] 監聽 `scroll` 事件使用 `throttle` 控制數量
+- [ ] 監聽 `scroll` 事件使用 `debounce` 控制數量
 - [x] 沒有設定 Authorization 的 `fetch`，每個 IP [每小時只能存取 60 次](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#checking-your-rate-limit-status)。加上 Authorization 後，使得每小時可以 `fetch` 的次數達 5,000 次
 
 # 輔助工具
