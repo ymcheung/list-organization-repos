@@ -1,6 +1,6 @@
 使用 React Hooks 列出 Github 的 [Repositories API](https://docs.github.com/en/rest/repos/repos#list-organization-repositories)。
 
-一打開頁面，抓取 12 筆 [Dcard](https://github.com/dcard) 公司的公開 Repository。
+一打開頁面，抓取 12 筆 [Vercel](https://github.com/vercel) 公司的公開 Repository。
 
 滾至頁面底端後，繼續加上 12 筆，直到沒有資料即停止。
 

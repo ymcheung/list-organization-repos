@@ -35,7 +35,7 @@ export default function App() {
     const { type, sort, direction, page } = form;
 
     const hostname = `https://api.github.com`;
-    const path = '/orgs/dcard/repos';
+    const path = '/orgs/vercel/repos';
     let params = `?type=${type}&sort=${sort}&direction=${direction}&per_page=12&page=${page}`;
 
     const config = {
