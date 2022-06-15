@@ -41,8 +41,7 @@ export default function App() {
     const config = {
       method: 'GET',
       headers: {
-        Accept: 'application/vnd.github.v3+json',
-        Authorization: `token ${process.env.REACT_APP_GITHUB_PERSONAL}`
+        Accept: 'application/vnd.github.v3+json'
       }
     };
 
